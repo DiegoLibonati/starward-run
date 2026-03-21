@@ -3,10 +3,10 @@
 block_cipher = None
 
 a = Analysis(
-    ['src/app.py'],
+    ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('src/assets', 'src/assets')],
+    datas=[('src/assets', 'src/assets'), ('.env', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -39,14 +39,4 @@ exe = EXE(
     entitlements_file=None,
     icon=None,
     onefile=True,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='app'
 )

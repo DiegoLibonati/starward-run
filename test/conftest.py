@@ -1,55 +1,73 @@
+import os
+
 import pygame
 import pytest
 
-from src.models.game import SpaceRunnerGame
-from src.models.obstacles import Bat, Grounder, Snail
-from src.models.player import Player
-from src.models.power import Power
-from src.utils.helpers import get_obstacle_by_type
+from src.configs.default_config import DefaultConfig
+from src.models.bat_model import BatModel
+from src.models.grounder_model import GrounderModel
+from src.models.player_model import PlayerModel
+from src.models.power_model import PowerModel
+from src.models.snail_model import SnailModel
+from src.ui.interface_game import InterfaceGame
+
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 
-def pytest_sessionstart() -> None:
-    """
-    Called after the Session object has been created and
-    before performing collection and entering the run test loop.
-    """
+@pytest.fixture(scope="session", autouse=True)
+def pygame_init() -> None:
     pygame.init()
-    pygame.display.set_mode(((800, 400)))
-
-
-def pytest_sessionfinish() -> None:
-    """
-    Called after whole test run finished, right before
-    returning the exit status to the system.
-    """
+    pygame.display.set_mode((800, 400))
+    yield
     pygame.quit()
 
 
 @pytest.fixture
-def space_runner_game() -> SpaceRunnerGame:
-    return SpaceRunnerGame()
+def default_config() -> DefaultConfig:
+    return DefaultConfig()
 
 
 @pytest.fixture
-def power() -> Power:
-    return Power()
+def bat_frames() -> list[pygame.Surface]:
+    return [pygame.Surface((50, 50)), pygame.Surface((50, 50))]
 
 
 @pytest.fixture
-def player() -> Player:
-    return Player()
+def snail_frames() -> list[pygame.Surface]:
+    return [pygame.Surface((50, 50)), pygame.Surface((50, 50))]
 
 
 @pytest.fixture
-def bat() -> Bat:
-    return get_obstacle_by_type(type="bat")
+def grounder_frames() -> list[pygame.Surface]:
+    return [pygame.Surface((50, 50)) for _ in range(6)]
 
 
 @pytest.fixture
-def snail() -> Snail:
-    return get_obstacle_by_type(type="snail")
+def bat(bat_frames: list[pygame.Surface]) -> BatModel:
+    return BatModel(frames=bat_frames, y_pos=210)
 
 
 @pytest.fixture
-def grounder() -> Grounder:
-    return get_obstacle_by_type(type="grounder")
+def snail(snail_frames: list[pygame.Surface]) -> SnailModel:
+    return SnailModel(frames=snail_frames, y_pos=300)
+
+
+@pytest.fixture
+def grounder(grounder_frames: list[pygame.Surface]) -> GrounderModel:
+    return GrounderModel(frames=grounder_frames, y_pos=300)
+
+
+@pytest.fixture
+def player() -> PlayerModel:
+    return PlayerModel()
+
+
+@pytest.fixture
+def power() -> PowerModel:
+    return PowerModel()
+
+
+@pytest.fixture
+def game(default_config: DefaultConfig) -> InterfaceGame:
+    return InterfaceGame(config=default_config)

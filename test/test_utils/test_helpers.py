@@ -1,30 +1,53 @@
-from src.models.obstacles import Bat, Grounder, Snail
-from src.utils.helpers import get_obstacle_by_type
+import os
+import sys
+
+import pytest
+
+from src.utils.helpers import resource_path
 
 
-def test_invalid_obstacle() -> None:
-    assert not get_obstacle_by_type(type="invalid")
+class TestResourcePathReturnType:
+    def test_returns_string(self) -> None:
+        assert isinstance(resource_path("some/path.png"), str)
+
+    def test_returns_non_empty_string(self) -> None:
+        assert resource_path("some/path.png") != ""
 
 
-def test_obstacle_snail() -> None:
-    snail = get_obstacle_by_type(type="snail")
+class TestResourcePathNormal:
+    def test_returns_absolute_path(self) -> None:
+        result = resource_path("some/path.png")
+        assert os.path.isabs(result)
 
-    assert isinstance(snail, Snail)
-    assert snail._frames
-    assert snail._y_pos == 300
+    def test_preserves_filename(self) -> None:
+        result = resource_path("some/path.png")
+        assert result.endswith("path.png")
+
+    def test_preserves_nested_structure(self) -> None:
+        result = resource_path("assets/graphics/player.png")
+        assert "assets" in result
+        assert "graphics" in result
+        assert result.endswith("player.png")
+
+    def test_base_is_current_directory(self) -> None:
+        expected_base = os.path.abspath(".")
+        result = resource_path("file.txt")
+        assert result.startswith(expected_base)
 
 
-def test_obstacle_bat() -> None:
-    bat = get_obstacle_by_type(type="bat")
+class TestResourcePathPyInstaller:
+    def test_uses_meipass_when_available(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(sys, "_MEIPASS", "/bundle/path", raising=False)
+        result = resource_path("assets/image.png")
+        assert result.startswith("/bundle/path")
 
-    assert isinstance(bat, Bat)
-    assert bat._frames
-    assert bat._y_pos == 210
+    def test_meipass_path_contains_relative(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(sys, "_MEIPASS", "/bundle", raising=False)
+        result = resource_path("assets/image.png")
+        assert "assets" in result
+        assert result.endswith("image.png")
 
-
-def test_obstacle_grounder() -> None:
-    grounder = get_obstacle_by_type(type="grounder")
-
-    assert isinstance(grounder, Grounder)
-    assert grounder._frames
-    assert grounder._y_pos == 300
+    def test_falls_back_to_cwd_without_meipass(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delattr(sys, "_MEIPASS", raising=False)
+        result = resource_path("file.txt")
+        assert os.path.isabs(result)

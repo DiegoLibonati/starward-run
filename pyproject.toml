@@ -1,0 +1,41 @@
+[project]
+name = "space-runner-game-program"
+version = "1.0.0"
+description = "Space Runner is a game developed in Python through the Pygame library. In this game we are going to control a space runner who will try to dodge the targets that come towards him. The way to dodge will be using A, D and Space to jump, a and d to move laterally. As time goes by, it is counted as a score, survive more and you will have more points. We can also use different powers that will appear randomly on the visible field of the map."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["test"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+log_cli = true
+log_cli_level = "WARNING"
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::pytest.PytestCollectionWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+env = [
+    "TEST_ENV_NAME=template_value",
+    "ENV_NAME=template_value"
+]
+
+[tool.ruff]
+line-length = 160
+exclude = [".git", "__pycache__", "env", "venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E203"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
