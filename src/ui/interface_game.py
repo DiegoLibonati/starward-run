@@ -110,8 +110,9 @@ class InterfaceGame:
         return self._player_single_group
 
     @property
-    def player(self) -> PlayerModel:
-        return self._player_single_group.sprites()[0]
+    def player(self) -> PlayerModel | None:
+        sprites = self._player_single_group.sprites()
+        return sprites[0] if sprites else None
 
     @property
     def power_single_group(self) -> pygame.sprite.GroupSingle:

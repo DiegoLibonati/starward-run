@@ -25,8 +25,8 @@ class PlayerModel(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
 
-        self._walk_index: float = 0
-        self._gravity: int = 0
+        self._walk_index: float = 0.0
+        self._gravity: float = 0.0
 
         self._skins: dict[str, tuple[list[pygame.Surface], pygame.Surface]] = {
             "normal": (
