@@ -1,4 +1,4 @@
-# Space Runner Game Program
+# StarwardRun
 
 ## Educational Purpose
 
@@ -24,7 +24,36 @@ The main goal is to explore and demonstrate best practices, patterns, and techno
 
 ## Description
 
-Space Runner is a game developed in Python through the Pygame library. In this game we are going to control a space runner who will try to dodge the targets that come towards him. The way to dodge will be using A, D and Space to jump, a and d to move laterally. As time goes by, it is counted as a score, survive more and you will have more points. We can also use different powers that will appear randomly on the visible field of the map.
+**StarwardRun** is a 2D side-scrolling runner game built in Python using the Pygame library. The player controls a space runner character that must survive an endless wave of incoming obstacles — snails crawling along the ground, bats swooping through the air, and fast-moving grounders that charge across the terrain. The goal is simple: stay alive as long as possible.
+
+**Gameplay mechanics:**
+- Move left and right with `A` and `D`, and jump with `SPACE` to dodge obstacles.
+- Survival time is your score — every second you stay alive adds one point.
+- As your score grows, new and faster obstacles are introduced, progressively increasing the difficulty.
+- Obstacle movement speed scales with your score through defined thresholds, so the longer you survive, the harder it gets.
+
+**Power-up system:**
+- Mystery boxes spawn randomly on the map every 15 to 30 seconds.
+- Walking into a mystery box grants one of two powers chosen at random:
+  - **Immunity:** the next obstacle collision is completely negated — you pass through it unharmed.
+  - **Killer:** the next obstacle you collide with is destroyed instead of ending your run, and a kill sound plays to confirm the elimination.
+- Powers last 5 seconds. After the timer expires, the effect wears off and you return to normal.
+
+**Progression:**
+- Snails are available from the start.
+- Bats unlock at score 10.
+- Grounders unlock at score 20.
+- Beyond score 200, obstacles reach their maximum speed of 30 pixels per frame.
+
+**Game states:**
+- The game opens on a waiting screen showing the title and your last score. Press `SPACE` to start or restart a run.
+- A collision with an obstacle while unprotected ends the game immediately, plays the game-over music, and returns to the waiting screen.
+
+**Technical highlights:**
+- Built entirely with Pygame, structured around a sprite-group architecture with `GroupSingle` for the player and power, and `Group` for obstacles.
+- Environment-aware configuration system supporting `development`, `production`, and `testing` modes via a `.env` file.
+- PyInstaller-compatible asset resolution through a custom `resource_path()` helper, enabling distribution as a single standalone executable on Windows, Linux, and Mac.
+- Comprehensive test suite covering configs, models, constants, helpers, and game logic, all running headless via SDL dummy drivers.
 
 ## Technologies used
 
@@ -64,11 +93,7 @@ pyinstaller==6.16.0
 
 ## Portfolio link
 
-[`https://www.diegolibonati.com.ar/#/project/Space-Runner-Game-Program`](https://www.diegolibonati.com.ar/#/project/Space-Runner-Game-Program)
-
-## Video
-
-https://user-images.githubusercontent.com/99032604/201543320-020d09af-9266-4a0b-8fff-dbaf4083f587.mp4
+[`https://www.diegolibonati.com.ar/#/project/starward-run`](https://www.diegolibonati.com.ar/#/project/starward-run)
 
 ## Testing
 
