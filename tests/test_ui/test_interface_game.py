@@ -58,7 +58,7 @@ def game() -> Generator[InterfaceGame, None, None]:
 class TestInterfaceGameInit:
     @pytest.mark.unit
     def test_title_is_starward_run(self, game: InterfaceGame) -> None:
-        assert game.title == "StarwardRun"
+        assert game.title == "Starward Run"
 
     @pytest.mark.unit
     def test_game_started_is_false(self, game: InterfaceGame) -> None:

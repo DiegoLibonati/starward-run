@@ -52,7 +52,7 @@ class InterfaceGame:
 
         self._config = config
 
-        self._title: str = "StarwardRun"
+        self._title: str = "Starward Run"
         self._game_started: bool = False
         self._score: int = 0
         self._start_time: int = 0

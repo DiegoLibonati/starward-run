@@ -1,4 +1,4 @@
-# StarwardRun
+# Starward Run
 
 ## Educational Purpose
 
@@ -24,7 +24,7 @@ The main goal is to explore and demonstrate best practices, patterns, and techno
 
 ## Description
 
-**StarwardRun** is a 2D side-scrolling runner game built in Python using the Pygame library. The player controls a space runner character that must survive an endless wave of incoming obstacles — snails crawling along the ground, bats swooping through the air, and fast-moving grounders that charge across the terrain. The goal is simple: stay alive as long as possible.
+**Starward Run** is a 2D side-scrolling runner game built in Python using the Pygame library. The player controls a space runner character that must survive an endless wave of incoming obstacles — snails crawling along the ground, bats swooping through the air, and fast-moving grounders that charge across the terrain. The goal is simple: stay alive as long as possible.
 
 **Gameplay mechanics:**
 - Move left and right with `A` and `D`, and jump with `SPACE` to dodge obstacles.
