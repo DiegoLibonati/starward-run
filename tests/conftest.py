@@ -15,7 +15,7 @@ def pygame_init() -> None:
 
 
 @pytest.fixture(scope="session")
-def surface(pygame_init: None) -> pygame.Surface:
+def surface() -> pygame.Surface:
     return pygame.display.set_mode((800, 600))
 
 
