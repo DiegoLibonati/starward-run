@@ -6,22 +6,6 @@ This project was created primarily for **educational and learning purposes**.
 While it is well-structured and could technically be used in production, it is **not intended for commercialization**.  
 The main goal is to explore and demonstrate best practices, patterns, and technologies in software development.
 
-## Getting Started
-
-1. Clone the repository
-2. Go to the repository folder and execute: `python -m venv venv`
-3. Execute in Windows: `venv\Scripts\activate`
-4. Execute in Linux/Mac: `source venv/bin/activate`
-5. Execute: `pip install -r requirements.txt`
-6. Execute: `pip install -r requirements.dev.txt`
-7. Execute: `pip install -r requirements.test.txt`
-8. Use `python app.py` or `python -m src` to execute the program
-
-### Pre-Commit for Development
-
-1. Once you're inside the virtual environment, let's install the hooks specified in the pre-commit. Execute: `pre-commit install`
-2. Now every time you try to commit, the pre-commit lint will run. If you want to do it manually, you can run the command: `pre-commit run --all-files`
-
 ## Description
 
 **Starward Run** is a 2D side-scrolling runner game built in Python using the Pygame library. The player controls a space runner character that must survive an endless wave of incoming obstacles — snails crawling along the ground, bats swooping through the air, and fast-moving grounders that charge across the terrain. The goal is simple: stay alive as long as possible.
@@ -91,11 +75,40 @@ pytest-xdist==3.5.0
 pyinstaller==6.16.0
 ```
 
-## Portfolio link
+## Getting Started
 
-[`https://www.diegolibonati.com.ar/#/project/starward-run`](https://www.diegolibonati.com.ar/#/project/starward-run)
+With the stack in mind, follow these steps to set up a virtual environment, install the dependencies, and provide the required environment variables to run the game locally.
+
+1. Clone the repository
+2. Go to the repository folder and execute: `python -m venv venv`
+3. Execute in Windows: `venv\Scripts\activate`
+4. Execute in Linux/Mac: `source venv/bin/activate`
+5. Execute: `pip install -r requirements.txt`
+6. Execute: `pip install -r requirements.dev.txt`
+7. Execute: `pip install -r requirements.test.txt`
+8. Copy `.env.example.dev` to `.env` so the application can load its configuration (see [Env Keys](#env-keys) for the available variables).
+9. Use `python app.py` or `python -m src` to execute the program
+
+### Pre-Commit for Development
+
+1. Once you're inside the virtual environment, let's install the hooks specified in the pre-commit. Execute: `pre-commit install`
+2. Now every time you try to commit, the pre-commit lint will run. If you want to do it manually, you can run the command: `pre-commit run --all-files`
+
+## Env Keys
+
+The `.env` file you copied during setup defines the runtime environment of the application. The following variables are recognized:
+
+1. `ENVIRONMENT`: Defines the application environment. Accepts `development`, `production`, or `testing`.
+2. `ENV_NAME`: A custom environment variable for template demonstration purposes.
+
+```
+ENVIRONMENT=development
+ENV_NAME=template_value
+```
 
 ## Testing
+
+With the environment configured and dependencies installed, you can run the full test suite to verify the game logic.
 
 1. Go to the repository folder
 2. Execute: `python -m venv venv`
@@ -105,9 +118,18 @@ pyinstaller==6.16.0
 6. Execute: `pip install -r requirements.test.txt`
 7. Execute: `pytest --log-cli-level=INFO`
 
+## Security Audit
+
+Beyond functional correctness, you should also verify that the project's dependencies do not contain known vulnerabilities. You can check them using **pip-audit**.
+
+1. Go to the repository folder
+2. Activate your virtual environment
+3. Execute: `pip install -r requirements.dev.txt`
+4. Execute: `pip-audit -r requirements.txt`
+
 ## Build
 
-You can generate a standalone executable (`.exe` on Windows, or binary on Linux/Mac) using **PyInstaller**.
+Once the project has been tested and audited, you can package it for distribution. You can generate a standalone executable (`.exe` on Windows, or binary on Linux/Mac) using **PyInstaller**.
 
 ### Windows
 
@@ -127,25 +149,10 @@ Alternatively, you can run the helper script: `build.bat`
 
 Alternatively, you can run the helper script: `./build.sh`
 
-## Security Audit
-
-You can check your dependencies for known vulnerabilities using **pip-audit**.
-
-1. Go to the repository folder
-2. Activate your virtual environment
-3. Execute: `pip install -r requirements.dev.txt`
-4. Execute: `pip-audit -r requirements.txt`
-
-## Env Keys
-
-1. `ENVIRONMENT`: Defines the application environment. Accepts `development`, `production`, or `testing`.
-2. `ENV_NAME`: A custom environment variable for template demonstration purposes.
-
-```
-ENVIRONMENT=development
-ENV_NAME=template_value
-```
-
 ## Known Issues
 
 None at the moment.
+
+## Portfolio link
+
+[`https://www.diegolibonati.com.ar/#/project/starward-run`](https://www.diegolibonati.com.ar/#/project/starward-run)
