@@ -13,7 +13,7 @@ else
 fi
 
 echo ">>> Installing build dependencies"
-pip install -r requirements.build.txt
+pip install -e ".[build]"
 
 echo ">>> Creating executable"
 pyinstaller app.spec

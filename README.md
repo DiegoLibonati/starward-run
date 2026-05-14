@@ -84,9 +84,7 @@ With the stack in mind, follow these steps to set up a virtual environment, inst
 2. Go to the repository folder and execute: `python -m venv venv`
 3. Execute in Windows: `venv\Scripts\activate`
 4. Execute in Linux/Mac: `source venv/bin/activate`
-5. Execute: `pip install -r requirements.txt`
-6. Execute: `pip install -r requirements.dev.txt`
-7. Execute: `pip install -r requirements.test.txt`
+5. Execute: `pip install -e ".[dev,test]"`
 8. Copy `.env.example.dev` to `.env` so the application can load its configuration (see [Env Keys](#env-keys) for the available variables).
 9. Use `python app.py` or `python -m src` to execute the program
 
@@ -115,8 +113,7 @@ With the environment configured and dependencies installed, you can run the full
 2. Execute: `python -m venv venv`
 3. Execute in Windows: `venv\Scripts\activate`
 4. Execute in Linux/Mac: `source venv/bin/activate`
-5. Execute: `pip install -r requirements.txt`
-6. Execute: `pip install -r requirements.test.txt`
+5. Execute: `pip install -e ".[test]"`
 7. Execute: `pytest --log-cli-level=INFO`
 
 ## Security Audit
@@ -125,7 +122,7 @@ Beyond functional correctness, you should also verify that the project's depende
 
 1. Go to the repository folder
 2. Activate your virtual environment
-3. Execute: `pip install -r requirements.dev.txt`
+3. Execute: `pip install -e ".[dev]"`
 4. Execute: `pip-audit -r requirements.txt`
 
 ## Build
@@ -136,7 +133,7 @@ Once the project has been tested and audited, you can package it for distributio
 
 1. Go to the repository folder
 2. Activate your virtual environment: `venv\Scripts\activate`
-3. Install build dependencies: `pip install -r requirements.build.txt`
+3. Install build dependencies: `pip install -e ".[build]"`
 4. Create the executable: `pyinstaller app.spec`
 
 Alternatively, you can run the helper script: `build.bat`
@@ -145,7 +142,7 @@ Alternatively, you can run the helper script: `build.bat`
 
 1. Go to the repository folder
 2. Activate your virtual environment: `source venv/bin/activate`
-3. Install build dependencies: `pip install -r requirements.build.txt`
+3. Install build dependencies: `pip install -e ".[build]"`
 4. Create the executable: `pyinstaller app.spec`
 
 Alternatively, you can run the helper script: `./build.sh`
