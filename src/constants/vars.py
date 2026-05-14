@@ -12,9 +12,9 @@ from src.constants.paths import (
     GRAPHIC_SNAIL_ANIMATION_1,
     GRAPHIC_SNAIL_ANIMATION_2,
 )
-from src.models.bat_model import BatModel
-from src.models.grounder_model import GrounderModel
-from src.models.snail_model import SnailModel
+from src.features.obstacles.bat import BatModel
+from src.features.obstacles.grounder import GrounderModel
+from src.features.obstacles.snail import SnailModel
 
 
 def get_obstacles() -> dict[str, BatModel | GrounderModel | SnailModel]:

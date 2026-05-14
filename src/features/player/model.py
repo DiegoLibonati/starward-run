@@ -1,5 +1,6 @@
 import pygame
 
+from src.constants.game import GROUND_Y
 from src.constants.paths import (
     GRAPHIC_PLAYER_JUMP_1,
     GRAPHIC_PLAYER_JUMP_IMMUNITY_1,
@@ -13,7 +14,6 @@ from src.constants.paths import (
     SOUND_PLAYER_JUMP,
 )
 
-_GROUND_Y: int = 300
 _JUMP_FORCE: int = -20
 _MOVE_SPEED: int = 2
 _X_RIGHT_LIMIT: int = 735
@@ -57,11 +57,11 @@ class PlayerModel(pygame.sprite.Sprite):
         self._jump_sound.set_volume(_JUMP_VOLUME)
 
         self.image: pygame.Surface = self._walk_frames[0]
-        self.rect: pygame.Rect = self.image.get_rect(midbottom=(80, _GROUND_Y))
+        self.rect: pygame.Rect = self.image.get_rect(midbottom=(80, GROUND_Y))
 
     @property
     def is_jump(self) -> bool:
-        return self.rect.bottom < _GROUND_Y
+        return self.rect.bottom < GROUND_Y
 
     def _input(self) -> None:
         keys = pygame.key.get_pressed()
@@ -78,8 +78,8 @@ class PlayerModel(pygame.sprite.Sprite):
         self._gravity += 1
         self.rect.y += self._gravity
 
-        if self.rect.bottom >= _GROUND_Y:
-            self.rect.bottom = _GROUND_Y
+        if self.rect.bottom >= GROUND_Y:
+            self.rect.bottom = GROUND_Y
             self._gravity = 0
 
     def _animation_state(self) -> None:

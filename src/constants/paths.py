@@ -1,7 +1,7 @@
 from src.utils.helpers import resource_path
 
-ROOT = "./src"
-ROOT_ASSETS = f"{ROOT}/assets"
+ROOT = "src"
+ROOT_ASSETS = "src/assets"
 
 # --- Graphics ---
 

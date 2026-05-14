@@ -1,6 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
+#
+# PRODUCTION NOTE: This spec bundles `.env` into the executable.
+# Before building a release, set ENVIRONMENT=production and all required
+# env keys with real production values in `.env`, then run:
+#   pyinstaller app.spec
+#
+# NEVER commit `.env` to version control — keep it in .gitignore.
 
-block_cipher = None
 
 a = Analysis(
     ['app.py'],
@@ -16,7 +22,7 @@ a = Analysis(
     optimize=0,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data)
 
 exe = EXE(
     pyz,

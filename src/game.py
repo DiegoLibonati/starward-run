@@ -1,58 +1,43 @@
 from random import choice, randint
-from sys import exit
 
 import pygame
 
 from src.configs.default_config import DefaultConfig
+from src.constants.game import GROUND_Y, SCREEN_H, SCREEN_W
 from src.constants.paths import (
     FONT_PRIMARY,
     GRAPHIC_GROUND,
-    GRAPHIC_PLAYER_STAND_1,
     GRAPHIC_SKY,
     SOUND_GAME_MUSIC,
     SOUND_GAME_OVER,
     SOUND_OBSTACLE_KILL,
 )
 from src.constants.vars import get_obstacles
-from src.models.player_model import PlayerModel
-from src.models.power_model import PowerModel
+from src.features.menu.view import MenuView
+from src.features.player.model import PlayerModel
+from src.features.power.model import PowerModel
 
-# Display
-_SCREEN_WIDTH: int = 800
-_SCREEN_HEIGHT: int = 400
 _FPS: int = 60
-_GROUND_Y: int = 300
 _FONT_SIZE: int = 50
-
-# Colors
-_COLOR_TITLE: tuple[int, int, int] = (111, 196, 169)
 _COLOR_SCORE: tuple[int, int, int] = (64, 64, 64)
-_COLOR_BG_MENU: tuple[int, int, int] = (94, 129, 162)
-
-# Custom events
 _EVENT_OBSTACLE: int = pygame.USEREVENT + 1
 _EVENT_POWER: int = pygame.USEREVENT + 2
-
-# Timers (ms)
 _OBSTACLE_TIMER_MS: int = 1500
 _POWER_TIMER_MIN_MS: int = 15000
 _POWER_TIMER_MAX_MS: int = 30000
-
-# Score thresholds to unlock obstacles
 _SCORE_UNLOCK_BAT: int = 10
 _SCORE_UNLOCK_GROUNDER: int = 20
-
-# Audio
 _BG_MUSIC_VOLUME: float = 0.1
 
 
-class InterfaceGame:
+class Game:
     def __init__(self, config: DefaultConfig) -> None:
         pygame.init()
 
         self._config = config
 
         self._title: str = "Starward Run"
+        self._running: bool = True
         self._game_started: bool = False
         self._score: int = 0
         self._start_time: int = 0
@@ -60,7 +45,7 @@ class InterfaceGame:
         self._power: PowerModel | None = None
 
         pygame.display.set_caption(self._title)
-        self._screen = pygame.display.set_mode((_SCREEN_WIDTH, _SCREEN_HEIGHT))
+        self._screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
         self._clock = pygame.time.Clock()
         self._player_single_group = pygame.sprite.GroupSingle()
         self._power_single_group = pygame.sprite.GroupSingle()
@@ -69,16 +54,10 @@ class InterfaceGame:
         self._game_over_music: pygame.mixer.Sound = pygame.mixer.Sound(SOUND_GAME_OVER)
         self._obstacle_kill: pygame.mixer.Sound = pygame.mixer.Sound(SOUND_OBSTACLE_KILL)
         self._primary_font = pygame.font.Font(FONT_PRIMARY, _FONT_SIZE)
-
-        self._player_stand_surface = pygame.transform.scale2x(pygame.image.load(GRAPHIC_PLAYER_STAND_1).convert_alpha())
         self._sky_surface = pygame.image.load(GRAPHIC_SKY).convert()
         self._ground_surface = pygame.image.load(GRAPHIC_GROUND).convert()
-        self._game_title_surface = self._primary_font.render(self._title, False, _COLOR_TITLE)
-        self._reset_game_surface = self._primary_font.render("Reset game with SPACE", False, _COLOR_TITLE)
-        self._player_stand_surface_rect = self._player_stand_surface.get_rect(center=(_SCREEN_WIDTH // 2, 200))
-        self._game_title_surface_rect = self._game_title_surface.get_rect(center=(_SCREEN_WIDTH // 2, 50))
-        self._reset_game_surface_rect = self._reset_game_surface.get_rect(center=(_SCREEN_WIDTH // 2, 350))
 
+        self._menu = MenuView(screen=self._screen, title=self._title)
         self._config_game()
 
     @property
@@ -151,7 +130,7 @@ class InterfaceGame:
 
     def _display_score(self) -> None:
         surface = self._primary_font.render(f"Score: {self._score}", False, _COLOR_SCORE)
-        self._screen.blit(surface, surface.get_rect(center=(_SCREEN_WIDTH // 2, 50)))
+        self._screen.blit(surface, surface.get_rect(center=(SCREEN_W // 2, 50)))
 
     def _update_obstacle_pool(self) -> None:
         self._obstacles_spawn.add("snail")
@@ -183,21 +162,14 @@ class InterfaceGame:
         return True
 
     def _render_menu(self) -> None:
-        self._screen.fill(_COLOR_BG_MENU)
-        self._screen.blit(self._player_stand_surface, self._player_stand_surface_rect)
-        self._screen.blit(self._game_title_surface, self._game_title_surface_rect)
-        self._screen.blit(self._reset_game_surface, self._reset_game_surface_rect)
-
-        if self._score:
-            final_score_surface = self._primary_font.render(f"Score: {self._score}", False, _COLOR_TITLE)
-            self._screen.blit(
-                final_score_surface,
-                final_score_surface.get_rect(center=(_SCREEN_WIDTH // 2, 80)),
-            )
+        self._menu.render(score=self._score)
 
     def _render_game(self) -> None:
+        if self._config.DEBUG:
+            pygame.display.set_caption(f"{self._title} - {int(self._clock.get_fps())} fps")
+
         self._screen.blit(self._sky_surface, (0, 0))
-        self._screen.blit(self._ground_surface, (0, _GROUND_Y))
+        self._screen.blit(self._ground_surface, (0, GROUND_Y))
 
         self._score = self._compute_score()
         self._display_score()
@@ -217,32 +189,38 @@ class InterfaceGame:
         self._game_started = self._collision_sprite()
 
     def game_loop(self) -> None:
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
+        try:
+            while self._running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self._running = False
+                        break
 
-                if not self._game_started and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    self._reset_game()
-                    self._game_started = True
-                    self._start_time = pygame.time.get_ticks()
-                    self._bg_music.play(loops=-1)
-                    self._game_over_music.stop()
+                    if not self._game_started and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                        self._reset_game()
+                        self._game_started = True
+                        self._start_time = pygame.time.get_ticks()
+                        self._bg_music.play(loops=-1)
+                        self._game_over_music.stop()
 
-                if self._game_started and event.type == _EVENT_OBSTACLE:
-                    self._update_obstacle_pool()
-                    obstacle = get_obstacles().get(choice(list(self._obstacles_spawn)))
-                    self._obstacle_group.add(obstacle)
+                    if self._game_started and event.type == _EVENT_OBSTACLE:
+                        self._update_obstacle_pool()
+                        obstacle = get_obstacles().get(choice(list(self._obstacles_spawn)))
+                        self._obstacle_group.add(obstacle)
 
-                if self._game_started and event.type == _EVENT_POWER:
-                    self._power = PowerModel()
-                    self._power_single_group.add(self._power)
+                    if self._game_started and event.type == _EVENT_POWER:
+                        self._power = PowerModel()
+                        self._power_single_group.add(self._power)
 
-            if self._game_started:
-                self._render_game()
-            else:
-                self._render_menu()
+                if not self._running:
+                    break
 
-            pygame.display.update()
-            self._clock.tick(_FPS)
+                if self._game_started:
+                    self._render_game()
+                else:
+                    self._render_menu()
+
+                pygame.display.update()
+                self._clock.tick(_FPS)
+        finally:
+            pygame.quit()

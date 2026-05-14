@@ -2,6 +2,7 @@ from random import choice, randint
 
 import pygame
 
+from src.constants.game import GROUND_Y
 from src.constants.paths import (
     GRAPHIC_MISTERY_BOX_ANIMATION_1,
     GRAPHIC_MISTERY_BOX_ANIMATION_2,
@@ -14,7 +15,6 @@ from src.constants.paths import (
 )
 
 _ANIM_SPEED: float = 0.1
-_GROUND_Y: int = 300
 _POWER_DURATION_MS: int = 5000
 _AVAILABLE_POWERS: tuple[str, ...] = ("immunity", "killer")
 _BOX_PATHS = (
@@ -40,7 +40,7 @@ class PowerModel(pygame.sprite.Sprite):
         self._power_pick_sound: pygame.mixer.Sound = pygame.mixer.Sound(SOUND_PLAYER_POWER_UP)
 
         self.image: pygame.Surface = self._frames[0]
-        self.rect: pygame.Rect = self.image.get_rect(midbottom=(randint(10, 730), _GROUND_Y))
+        self.rect: pygame.Rect = self.image.get_rect(midbottom=(randint(10, 730), GROUND_Y))
 
     def _animation_state(self) -> None:
         self._animation_index = (self._animation_index + _ANIM_SPEED) % len(self._frames)

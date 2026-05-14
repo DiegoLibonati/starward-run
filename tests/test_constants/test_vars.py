@@ -4,9 +4,9 @@ import pygame
 import pytest
 
 from src.constants.vars import get_obstacles
-from src.models.bat_model import BatModel
-from src.models.grounder_model import GrounderModel
-from src.models.snail_model import SnailModel
+from src.features.obstacles.bat import BatModel
+from src.features.obstacles.grounder import GrounderModel
+from src.features.obstacles.snail import SnailModel
 
 
 @pytest.fixture

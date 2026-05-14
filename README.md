@@ -45,31 +45,32 @@ The main goal is to explore and demonstrate best practices, patterns, and techno
 
 ## Libraries used
 
-#### Requirements.txt
+#### Runtime (`[project.dependencies]`)
 
 ```
 pygame==2.6.1
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 ```
 
-#### Requirements.dev.txt
+#### Dev (`[project.optional-dependencies]` dev)
+
 ```
 pre-commit==4.3.0
 pip-audit==2.7.3
 ruff==0.11.12
 ```
 
-#### Requirements.test.txt
+#### Test (`[project.optional-dependencies]` test)
 
 ```
-pytest==8.4.2
+pytest==9.0.3
 pytest-env==1.1.5
 pytest-cov==4.1.0
 pytest-timeout==2.3.1
 pytest-xdist==3.5.0
 ```
 
-#### Requirements.build.txt
+#### Build (`[project.optional-dependencies]` build)
 
 ```
 pyinstaller==6.16.0
@@ -103,7 +104,7 @@ The `.env` file you copied during setup defines the runtime environment of the a
 
 ```
 ENVIRONMENT=development
-ENV_NAME=template_value
+ENV_NAME=your-app-name
 ```
 
 ## Testing

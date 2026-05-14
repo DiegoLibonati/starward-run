@@ -1,6 +1,6 @@
 import pygame
 
-from src.models.obstacle_model import ObstacleModel
+from src.features.obstacles.base import ObstacleModel
 
 
 class GrounderModel(ObstacleModel):
