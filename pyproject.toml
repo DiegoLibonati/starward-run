@@ -1,6 +1,6 @@
 [project]
 name = "starward-run"
-version = "1.0.0"
+version = "1.1.0"
 description = "Starward Run is a 2D side-scrolling runner game built in Python using the Pygame library."
 requires-python = ">=3.11"
 dependencies = [
