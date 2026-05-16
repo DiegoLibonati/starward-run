@@ -76,11 +76,11 @@ class PlayerModel(pygame.sprite.Sprite):
 
     def _apply_gravity(self) -> None:
         self._gravity += 1
-        self.rect.y += self._gravity
+        self.rect.y += int(self._gravity)
 
         if self.rect.bottom >= GROUND_Y:
             self.rect.bottom = GROUND_Y
-            self._gravity = 0
+            self._gravity = 0.0
 
     def _animation_state(self) -> None:
         if self.is_jump:

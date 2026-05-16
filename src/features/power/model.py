@@ -59,7 +59,7 @@ class PowerModel(pygame.sprite.Sprite):
         self.kill()
 
     def stop_power(self) -> None:
-        if self.current_power and pygame.time.get_ticks() >= self._power_reset_time:
+        if self.current_power and self._power_reset_time is not None and pygame.time.get_ticks() >= self._power_reset_time:
             self.current_power = ""
 
     def update(self, player: pygame.sprite.GroupSingle) -> None:
