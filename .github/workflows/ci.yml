@@ -71,6 +71,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]')
 
     steps:
       - uses: actions/checkout@v4.2.2
@@ -105,9 +106,9 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'chore(release):') && !contains(github.event.head_commit.message, '[skip release]')
     outputs:
-      new_tag: ${{ steps.version.outputs.new_tag }}
-      version: ${{ steps.version.outputs.version }}
-      released: ${{ steps.version.outputs.released }}
+      released: ${{ steps.release.outputs.released }}
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4.2.2
@@ -115,169 +116,12 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute next version from commits
-        id: version
-        run: |
-          set -euo pipefail
-          LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          BOOTSTRAPPED="false"
-
-          if [ -z "$LATEST" ]; then
-            PYVER=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/')
-            if [ -n "$PYVER" ]; then
-              LATEST="v${PYVER}"
-              BOOTSTRAPPED="true"
-              echo "No tags found. Bootstrapping from pyproject.toml: ${LATEST}"
-            else
-              LATEST="v0.0.0"
-              BOOTSTRAPPED="true"
-              echo "No tags and no version in pyproject.toml. Starting from ${LATEST}"
-            fi
-          fi
-
-          CURRENT=${LATEST#v}
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          if [ "$BOOTSTRAPPED" = "true" ]; then
-            COMMITS=$(git log --pretty=format:'%s%n%b%n---' HEAD)
-          else
-            COMMITS=$(git log --pretty=format:'%s%n%b%n---' "${LATEST}..HEAD")
-          fi
-
-          if [ -z "$COMMITS" ]; then
-            echo "released=false" >> "$GITHUB_OUTPUT"
-            echo "No new commits since ${LATEST}. Skipping release."
-            exit 0
-          fi
-
-          BUMP="patch"
-          if echo "$COMMITS" | grep -qE '(^|\n)BREAKING CHANGE:|^[a-zA-Z]+(\([^)]+\))?!:'; then
-            BUMP="major"
-          elif echo "$COMMITS" | grep -qE '^feat(\([^)]+\))?:'; then
-            BUMP="minor"
-          fi
-
-          case "$BUMP" in
-            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-            patch) PATCH=$((PATCH + 1)) ;;
-          esac
-
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          NEW_TAG="v${NEW_VERSION}"
-
-          echo "Previous tag: ${LATEST}"
-          echo "Bump: ${BUMP}"
-          echo "New version: ${NEW_TAG}"
-
-          echo "released=true" >> "$GITHUB_OUTPUT"
-          echo "old_tag=${LATEST}" >> "$GITHUB_OUTPUT"
-          echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
-          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Generate changelog entry
-        if: steps.version.outputs.released == 'true'
-        run: |
-          set -euo pipefail
-          OLD="${{ steps.version.outputs.old_tag }}"
-          NEW="${{ steps.version.outputs.new_tag }}"
-          DATE=$(date -u +%Y-%m-%d)
-
-          if ! git rev-parse "$OLD" >/dev/null 2>&1; then
-            RANGE="HEAD"
-          else
-            RANGE="${OLD}..HEAD"
-          fi
-
-          format_section() {
-            local title="$1"; local pattern="$2"
-            local items
-            items=$(git log --no-merges --pretty=format:'- %s (%h)' "$RANGE" | grep -E "$pattern" || true)
-            if [ -n "$items" ]; then
-              echo "### ${title}"
-              echo ""
-              echo "$items"
-              echo ""
-            fi
-          }
-
-          {
-            echo "## [${NEW}] - ${DATE}"
-            echo ""
-            format_section "Breaking changes" '^- [a-zA-Z]+(\([^)]+\))?!:'
-            format_section "Features" '^- feat(\([^)]+\))?:'
-            format_section "Bug fixes" '^- fix(\([^)]+\))?:'
-            format_section "Performance" '^- perf(\([^)]+\))?:'
-            format_section "Refactors" '^- refactor(\([^)]+\))?:'
-            format_section "Documentation" '^- docs(\([^)]+\))?:'
-            format_section "Build & CI" '^- (build|ci)(\([^)]+\))?:'
-            format_section "Other" '^- (chore|style|test)(\([^)]+\))?:'
-
-            uncategorized=$(git log --no-merges --pretty=format:'- %s (%h)' "$RANGE" \
-              | grep -vE '^- (feat|fix|perf|refactor|docs|build|ci|chore|style|test)(\([^)]+\))?!?:' || true)
-            if [ -n "$uncategorized" ]; then
-              echo "### Uncategorized"
-              echo ""
-              echo "$uncategorized"
-              echo ""
-            fi
-          } > /tmp/entry.md
-
-          cp /tmp/entry.md release_notes.md
-
-          if [ ! -f CHANGELOG.md ]; then
-            {
-              echo "# Changelog"
-              echo ""
-              echo "All notable changes to this project are documented in this file."
-              echo ""
-              echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),"
-              echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
-              echo ""
-            } > CHANGELOG.md
-          fi
-
-          awk -v entry_file=/tmp/entry.md '
-            BEGIN { inserted = 0 }
-            /^## \[/ && !inserted {
-              while ((getline line < entry_file) > 0) print line
-              close(entry_file)
-              inserted = 1
-            }
-            { print }
-            END {
-              if (!inserted) {
-                while ((getline line < entry_file) > 0) print line
-                close(entry_file)
-              }
-            }
-          ' CHANGELOG.md > CHANGELOG.new.md
-          mv CHANGELOG.new.md CHANGELOG.md
-
-      - name: Bump version in pyproject.toml
-        if: steps.version.outputs.released == 'true'
-        run: |
-          sed -i -E '0,/^version = ".*"$/s//version = "${{ steps.version.outputs.version }}"/' pyproject.toml
-
-      - name: Commit, tag and push
-        if: steps.version.outputs.released == 'true'
-        run: |
-          set -euo pipefail
-          TAG="${{ steps.version.outputs.new_tag }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md pyproject.toml
-          git commit -m "chore(release): ${TAG}"
-          git tag -a "${TAG}" -m "Release ${TAG}"
-          git push --atomic origin main "refs/tags/${TAG}"
-
-      - name: Upload release notes
-        if: steps.version.outputs.released == 'true'
-        uses: actions/upload-artifact@v4
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.21.0
         with:
-          name: release-notes
-          path: release_notes.md
-          retention-days: 1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          vcs_release: false
 
   build-windows-exe:
     name: Build .exe
@@ -288,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
         with:
-          ref: ${{ needs.prepare-release.outputs.new_tag }}
+          ref: ${{ needs.prepare-release.outputs.tag }}
 
       - name: Set up Python
         uses: actions/setup-python@v5.5.0
@@ -309,7 +153,7 @@ jobs:
       - name: Rename artifact
         shell: pwsh
         run: |
-          $version = "${{ needs.prepare-release.outputs.new_tag }}"
+          $version = "${{ needs.prepare-release.outputs.tag }}"
           $newName = "starward-run-$version-windows.exe"
           Move-Item dist/app.exe "dist/$newName"
 
@@ -327,10 +171,10 @@ jobs:
     if: needs.prepare-release.outputs.released == 'true'
 
     steps:
-      - name: Download release notes
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4.2.2
         with:
-          name: release-notes
+          ref: ${{ needs.prepare-release.outputs.tag }}
+          fetch-depth: 0
 
       - name: Download Windows binary
         uses: actions/download-artifact@v4
@@ -338,11 +182,8 @@ jobs:
           name: windows-binary
           path: dist
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.0.8
+      - name: Publish to GitHub Release
+        uses: python-semantic-release/publish-action@v9.21.0
         with:
-          tag_name: ${{ needs.prepare-release.outputs.new_tag }}
-          name: ${{ needs.prepare-release.outputs.new_tag }}
-          body_path: release_notes.md
-          files: dist/*.exe
-          fail_on_unmatched_files: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.prepare-release.outputs.tag }}

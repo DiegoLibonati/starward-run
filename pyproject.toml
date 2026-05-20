@@ -14,6 +14,7 @@ dev = [
     "pip-audit==2.7.3",
     "ruff==0.11.12",
     "mypy==1.13.0",
+    "python-semantic-release==9.21.0",
 ]
 test = [
     "pytest==9.0.3",
@@ -69,3 +70,29 @@ indent-style = "space"
 python_version = "3.11"
 strict = false
 exclude = ["venv", "tests"]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+branch = "main"
+changelog_file = "CHANGELOG.md"
+build_command = ""
+commit_message = "chore(release): v{version} [skip release]"
+tag_format = "v{version}"
+major_on_zero = false
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "perf", "refactor", "docs", "build", "ci", "chore", "style", "test"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+default_bump_level = 0
+
+[tool.semantic_release.remote]
+type = "github"
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*.exe"]
+upload_to_vcs_release = true
